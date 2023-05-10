@@ -75,6 +75,27 @@ module project_top
     `include "vectorpath_rev1_port_list.svh"
 );
 
+    //---------------------------------------------------------------------
+    // The system reset manager - Generates the active-low "resetn" signal
+    //---------------------------------------------------------------------
+    logic stimuli_valid, do_reset, resetn;
+    sys_reset_mgr i_sys_reset_mgr
+    (
+        .clk            (i_clk),
+        .stimuli_valid  (stimuli_valid),
+        .do_reset       (do_reset),
+        .resetn         (resetn)
+    );
+    //---------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------------------------------------
+    // This block simply counts clock-cycles.   It's convenient to display this in the Snapshot GUI.
+    //-----------------------------------------------------------------------------------------------------
+    reg[15:0] clock_cycle;
+    always @(posedge i_clk) clock_cycle <= clock_cycle + 1;
+    //-----------------------------------------------------------------------------------------------------
+
+
     // Create handy constants that define the size of the NAP (Network Access Point) signals
     localparam NAP_H_DATA_WIDTH = `ACX_NAP_HORIZONTAL_DATA_WIDTH;
     localparam NAP_V_DATA_WIDTH = `ACX_NAP_VERTICAL_DATA_WIDTH;
@@ -86,28 +107,6 @@ module project_top
     // Define the NoC columns where our sender and receiver modules tie into the network
     localparam NOC_COL_SEND = 1;
     localparam NOC_COL_RECV = 2;
-
-    //-----------------------------------------------------------------------------------------------------
-    // This block holds resetn low for a few cycles, then drives it high
-    //-----------------------------------------------------------------------------------------------------
-    logic resetn = 0;
-    logic reset_counter[4] = 4'b1111;
-    //-----------------------------------------------------------------------------------------------------
-    always @(posedge i_clk) begin
-        if (reset_counter)
-            reset_counter <= reset_counter - 1;
-        else
-            resetn <= 1;
-    end
-    //-----------------------------------------------------------------------------------------------------
-
-
-    //-----------------------------------------------------------------------------------------------------
-    // This block simply counts clock-cycles.   It's convenient to display this in the Snapshot GUI.
-    //-----------------------------------------------------------------------------------------------------
-    reg[15:0] clock_cycle;
-    always @(posedge i_clk) clock_cycle <= clock_cycle + 1;
-    //-----------------------------------------------------------------------------------------------------
 
 
     //-----------------------------------------------------------------------------------------------------
@@ -201,8 +200,13 @@ module project_top
     // Create a bus wide enough to hold all of the signals we want to monitor
     wire[MONITOR_WIDTH-1 : 0] monitor;
 
+    // This will go high when the user presses the "Arm" button in the GUI
+    wire arm;
+
     assign monitor =
     {
+        arm,
+
         clock_cycle, 
 
         iface_sender_tx.valid,
@@ -214,7 +218,11 @@ module project_top
         iface_recver_rx.data[7:0]
     };
 
- 
+    // Declare the various stimuli that can arrive from the GUI
+    localparam STIMULI_WIDTH = 1;
+    wire[STIMULI_WIDTH-1 : 0] stimuli;
+    assign {do_reset} = stimuli;
+
     ACX_SNAPSHOT #
     (
         .DUT_NAME           ("snapshot_example"),
@@ -222,7 +230,7 @@ module project_top
         .MONITOR_DEPTH      (MONITOR_DEPTH),    // 1..16384
         .TRIGGER_WIDTH      (TRIGGER_WIDTH),    // 1..40
         .STANDARD_TRIGGERS  (1),                // use i_monitor[39:0] as trigger input
-        .STIMULI_WIDTH      (0),                // 0..512
+        .STIMULI_WIDTH      (STIMULI_WIDTH),    // 0..512
         .INPUT_PIPELINING   (3),                // for i_monitor and i_trigger
         .OUTPUT_PIPELINING  (0),                // for o_stimuli(_valid) and o_arm
         .ARM_DELAY          (2)                 // between o_stimuli_valid and o_arm
@@ -234,13 +242,12 @@ module project_top
       .i_user_clk       (i_clk),
       .i_monitor        (monitor),
       .i_trigger        (), 
-      .o_stimuli        (),
-      .o_stimuli_valid  (),
-      .o_arm            (),
+      .o_stimuli        (stimuli),
+      .o_stimuli_valid  (stimuli_valid),
+      .o_arm            (arm),
       .o_trigger        ()
     );
     //-----------------------------------------------------------------------------------------------------
-
 
     // Turn on the output-enables for each LED
     assign led_l_oe = 8'hff; 

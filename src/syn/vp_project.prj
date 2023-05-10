@@ -1,7 +1,7 @@
 #--  Synopsys, Inc.
 #--  Version S-2021.09X-2
-#--  Project file /fpga/vp_data_streaming_example/src/syn/vp_project.prj
-#--  Written on Mon May  8 15:30:16 2023
+#--  Project file /fpga/vp_snapshot_example/src/syn/vp_project.prj
+#--  Written on Tue May  9 17:07:40 2023
 
 
 #project files
@@ -10,6 +10,7 @@ add_file -verilog -vlog_std sysv "../../ace_install_folder/Achronix-linux/librar
 add_file -verilog -vlog_std sysv "../rtl/nap_horizontal_wrapper.sv"
 add_file -verilog -vlog_std sysv "../rtl/recver.sv"
 add_file -verilog -vlog_std sysv "../rtl/sender.sv"
+add_file -verilog -vlog_std sysv "../rtl/sys_reset_mgr.sv"
 add_file -verilog -vlog_std sysv "../rtl/project_top.sv"
 add_file -constraint "../constraints/synplify_constraints.sdc"
 add_file -constraint "../constraints/ace_constraints.sdc"
