@@ -71,7 +71,7 @@ module project_top
     input  wire t_JTAG_INPUT   i_jtag_in,
     output wire t_JTAG_OUTPUT  o_jtag_out,
 
-
+    // This must be included in the port-list of any VectorPath project
     `include "vectorpath_rev1_port_list.svh"
 );
 
@@ -92,7 +92,12 @@ module project_top
     // This block simply counts clock-cycles.   It's convenient to display this in the Snapshot GUI.
     //-----------------------------------------------------------------------------------------------------
     reg[15:0] clock_cycle;
-    always @(posedge i_clk) clock_cycle <= clock_cycle + 1;
+    always @(posedge i_clk) begin
+        if (resetn == 0)
+            clock_cycle <= 0;
+        else
+            clock_cycle <= clock_cycle + 1;
+    end
     //-----------------------------------------------------------------------------------------------------
 
 
@@ -192,7 +197,7 @@ module project_top
     // From here down is the Snapshot debugger
     //-----------------------------------------------------------------------------------------------------
     localparam integer MONITOR_WIDTH = 41;
-    localparam integer MONITOR_DEPTH = 2000; 
+    localparam integer MONITOR_DEPTH = 1024; 
     
     // The Snapshot IP allows a maximum of 40 triggers.
     localparam TRIGGER_WIDTH = MONITOR_WIDTH < 40? MONITOR_WIDTH : 40;

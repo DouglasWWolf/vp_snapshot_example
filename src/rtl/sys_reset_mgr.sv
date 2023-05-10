@@ -17,7 +17,7 @@ module sys_reset_mgr
     output wire resetn
 );
     localparam ACTIVE = 1;
-    localparam INACTIVE = 2;
+    localparam INACTIVE = 0;
 
     // This is active high
     logic reset = ACTIVE;
