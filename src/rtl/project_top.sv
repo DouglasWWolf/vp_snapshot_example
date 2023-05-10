@@ -75,9 +75,9 @@ module project_top
     `include "vectorpath_rev1_port_list.svh"
 );
 
-    //---------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
     // The system reset manager - Generates the active-low "resetn" signal
-    //---------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
     logic stimuli_valid, do_reset, resetn;
     sys_reset_mgr i_sys_reset_mgr
     (
@@ -86,7 +86,7 @@ module project_top
         .do_reset       (do_reset),
         .resetn         (resetn)
     );
-    //---------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
 
     //-----------------------------------------------------------------------------------------------------
     // This block simply counts clock-cycles.   It's convenient to display this in the Snapshot GUI.
@@ -203,6 +203,7 @@ module project_top
     // This will go high when the user presses the "Arm" button in the GUI
     wire arm;
 
+    // This is a list of all the waveforms we want to capture and display in the debugger
     assign monitor =
     {
         arm,
